@@ -16,7 +16,8 @@
 <div align="center">
 
 [![C++](https://img.shields.io/badge/-%E2%9C%94%EF%B8%8FC++-FF69B4?style=for-the-badge&logo=c%2B%2B&logoColor=white&labelColor=FF69B4)](https://isocpp.org/)
-[![Bash](https://img.shields.io/badge/-%E2%9A%A1%EF%B8%8FShell-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white&labelColor=4EAA25)](https://www.gnu.org/software/bash/)
+![Makefile](https://img.shields.io/badge/-%E2%9A%92%EF%B8%8FMakefile-BC5F1B?style=for-the-badge&logo=cmake&logoColor=white&labelColor=BC5F1B)
+
 
 </div>
 
