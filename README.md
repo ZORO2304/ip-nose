@@ -121,7 +121,7 @@ _________
 </div>
 
 <div align="center">
-  <h2>🐞 Signaler un Bug dans Hashish 🐞</h2>
+  <h2>🐞 Signaler un Bug dans ip-nose 🐞</h2>
   <p>
     Rencontrez-vous un problème avec ip-nose ? Aidez-nous à améliorer le projet en signalant les bugs !
     Cliquez sur le bouton ci-dessous pour ouvrir directement un nouveau rapport de bug pré-rempli.
