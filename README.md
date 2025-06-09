@@ -73,59 +73,62 @@ termux-reload-settings
 
 ---
 
-## 🚀 Utilisation
+## 🚀 Utilisation :
 
-Pour lancer l'outil :
+```
+ip-nose
 
-```bash
-ip-nose --help
+```
 
-Exemples :
- * Géolocaliser une IP :
-   ip-nose 8.8.8.8
+## *🤝 Contributions*
 
- * Afficher votre IP :
-   ip-nose --self
+**Les contributions sont les bienvenues ! Si vous souhaitez améliorer Hashish, corriger des bugs ou ajouter de nouvelles fonctionnalités, veuillez consulter notre Guide de Contribution.**
 
- * Consulter l'historique :
-   ip-nose --history
-
-🤝 Contributions
-Les contributions sont les bienvenues ! Si vous souhaitez améliorer ip-nose, n'hésitez pas à proposer des modifications.
+[![Sponsor me on GitHub](https://img.shields.io/badge/Sponsor-GitHub-brightgreen.svg)](https://github.com/sponsors/karim93160)
+[![Buy me a coffee](https://img.shields.io/badge/Donate-Buy%20Me%20A%20Coffee-FFDD00.svg)](https://www.buymeacoffee.com/karim93160)
+[![Support me on Ko-fi](https://img.shields.io/badge/Donate-Ko--fi-F16061.svg)](https://ko-fi.com/karim93160)
+[![Support me on Patreon](https://img.shields.io/badge/Patreon-Support%20me-FF424D.svg)](https://www.patreon.com/karim93160)
+[![Donate on Liberapay](https://img.shields.io/badge/Donate-Liberapay-F6C915.svg)](https://liberapay.com/karim93160/donate)
 
 
+_________
 
+## Licence 📜
 
+hashish est distribué sous la licence [MIT License](https://github.com/Karim93160/ip-nose/blob/dd4e26435e4833691a24a781af5a991cf401a107/LICENSE)
 
-Licence 📜
-ip-nose est distribué sous la licence MIT License
-Contact 📧
-Pour toute question ou suggestion :
+_________
+
+## Contact 📧
+
+Pour toute question ou suggestion, n'hésitez pas à ouvrir une [issue sur GitHub](https://github.com/Karim93160/ip-nose/issues) ou à nous contacter par email :
+
+[![Contact par Email](https://img.shields.io/badge/Contact-par%20Email-blue.svg)](mailto:karim9316077185@gmail.com)
+
+_________
 <div align="center">
-<h2>🌿 Code de Conduite 🌿</h2>
-<p>
-Nous nous engageons à créer un environnement respectueux.
-Consultez notre <a href="CODE_OF_CONDUCT.md">Code de Conduite</a>.
-</p>
-<p>
-<a href="CODE_OF_CONDUCT.md">
-<img src="https://img.shields.io/badge/Code%20of%20Conduct-Veuillez%20Lire-blueviolet?style=for-the-badge&logo=github" alt="Code de Conduite">
-</a>
-</p>
+  <h2>🌿 ip-nose - Code de Conduite 🌿</h2>
+  <p>
+    Nous nous engageons à créer un environnement accueillant et respectueux pour tous les contributeurs.
+    Veuillez prendre un moment pour lire notre <a href="CODE_OF_CONDUCT.md">Code de Conduite</a>.
+    En participant à ce projet, vous acceptez de respecter ses termes.
+  </p>
+  <p>
+    <a href="CODE_OF_CONDUCT.md">
+      <img src="https://img.shields.io/badge/Code%20of%20Conduct-Veuillez%20Lire-blueviolet?style=for-the-badge&logo=github" alt="Code de Conduite">
+    </a>
+  </p>
 </div>
+
 <div align="center">
-<h2>🐞 Signaler un Bug 🐞</h2>
-<p>
-Un problème avec ip-nose ? Aidez-nous à l'améliorer !
-</p>
-<p>
-<a href="https://github.com/karim93160/ip-nose/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=">
-<img src="https://img.shields.io/badge/Signaler%20un%20Bug-Ouvrir%20une%20Issue-red?style=for-the-badge&logo=bugsnag" alt="Signaler un Bug">
-</a>
-</p>
+  <h2>🐞 Signaler un Bug dans Hashish 🐞</h2>
+  <p>
+    Rencontrez-vous un problème avec ip-nose ? Aidez-nous à améliorer le projet en signalant les bugs !
+    Cliquez sur le bouton ci-dessous pour ouvrir directement un nouveau rapport de bug pré-rempli.
+  </p>
+  <p>
+    <a href="https://github.com/karim93160/ip-nose/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=">
+      <img src="https://img.shields.io/badge/Signaler%20un%20Bug-Ouvrir%20une%20Issue-red?style=for-the-badge&logo=bugsnag" alt="Signaler un Bug">
+    </a>
+  </p>
 </div>
-⚠️ Avertissement
-ip-nose est un outil d'information. Son utilisation doit respecter les lois en vigueur.
-<p align="center">
-Fait avec ❤️ par Karim
-</p>
