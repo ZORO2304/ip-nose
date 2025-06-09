@@ -82,7 +82,7 @@ ip-nose
 
 ## *🤝 Contributions*
 
-**Les contributions sont les bienvenues ! Si vous souhaitez améliorer Hashish, corriger des bugs ou ajouter de nouvelles fonctionnalités, veuillez consulter notre Guide de Contribution.**
+**Les contributions sont les bienvenues ! Si vous souhaitez améliorer ip-nose, corriger des bugs ou ajouter de nouvelles fonctionnalités, veuillez consulter notre Guide de Contribution.**
 
 [![Sponsor me on GitHub](https://img.shields.io/badge/Sponsor-GitHub-brightgreen.svg)](https://github.com/sponsors/karim93160)
 [![Buy me a coffee](https://img.shields.io/badge/Donate-Buy%20Me%20A%20Coffee-FFDD00.svg)](https://www.buymeacoffee.com/karim93160)
