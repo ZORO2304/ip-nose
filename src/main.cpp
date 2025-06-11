@@ -192,11 +192,11 @@ int main(int argc, char* argv[]) {
         } else if (arg1 == "--gps" || arg1 == "-g") { // NOUVELLE OPTION POUR LE GPS
             GeoCoord gps_pos = get_gps_location_termux();
             if (gps_pos.latitude != 0.0 || gps_pos.longitude != 0.0) { // Vérifie si la position n'est pas nulle
-                 std::cout << TerminalDisplay::BOLD << TerminalDisplay::GREEN << "\n[GPS RESULTAT]" << TerminalDisplay::RESET << std::endl;
-                 std::cout << TerminalDisplay::GREEN << "  Votre position GPS :" << TerminalDisplay::RESET << std::endl;
-                 std::cout << TerminalDisplay::BRIGHT_MAGENTA << "  Latitude : " << std::fixed << std::setprecision(6) << gps_pos.latitude << TerminalDisplay::RESET << std::endl;
-                 std::cout << TerminalDisplay::BRIGHT_MAGENTA << "  Longitude: " << std::fixed << std::setprecision(6) << gps_pos.longitude << TerminalDisplay::RESET << std::endl;
-                 // Suppression de l'appel à prompt_open_in_maps ici
+                std::cout << TerminalDisplay::BOLD << TerminalDisplay::GREEN << "\n[GPS RESULTAT]" << TerminalDisplay::RESET << std::endl;
+                std::cout << TerminalDisplay::GREEN << "  Votre position GPS :" << TerminalDisplay::RESET << std::endl;
+                std::cout << TerminalDisplay::BRIGHT_MAGENTA << "  Latitude : " << std::fixed << std::setprecision(6) << gps_pos.latitude << TerminalDisplay::RESET << std::endl;
+                std::cout << TerminalDisplay::BRIGHT_MAGENTA << "  Longitude: " << std::fixed << std::setprecision(6) << gps_pos.longitude << TerminalDisplay::RESET << std::endl;
+                // Suppression de l'appel à prompt_open_in_maps ici
             } else {
                 std::cerr << TerminalDisplay::BRIGHT_RED << "Impossible de récupérer la position GPS. Vérifiez les prérequis." << TerminalDisplay::RESET << std::endl;
             }
@@ -338,8 +338,3 @@ void displayCredits() {
     std::cout << std::endl;
     std::cout << BRIGHT_BLACK << "Copyright (c) 2024 Karim93160. Tous droits réservés." << RESET << std::endl;
 }
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 9621915b40066bc9ccea2304e6fbdf84277aee47
