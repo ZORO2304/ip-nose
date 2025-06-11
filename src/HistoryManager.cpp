@@ -1,149 +1,98 @@
-// src/HistoryManager.cpp
 #include "HistoryManager.h"
-#include <iostream>
-#include <algorithm> // Pour std::reverse
-#include <vector>    // Pour std::vector (bien que déjà inclus via HistoryManager.h)
-#include "TerminalDisplay.h" // Pour les couleurs
+#include <algorithm> // Pour std::reverse, std::remove_if
+#include <iomanip>   // Pour std::setw, std::left
+#include <sstream>   // Pour std::istringstream
 
-// Constructeur
-HistoryManager::HistoryManager(const std::string& historyFilePath, size_t maxEntries)
-    : filePath(historyFilePath), maxHistoryEntries(maxEntries) {
-    // Tente de charger l'historique existant au démarrage
+HistoryManager::HistoryManager(const std::string& filePath, size_t maxEntries)
+    : filePath(filePath), maxEntries(maxEntries) {
     loadHistory();
 }
 
-// Génère un horodatage actuel au format string
-std::string HistoryManager::getCurrentTimestamp() const {
-    auto now = std::chrono::system_clock::now();
-    std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
-    std::tm* localTime = std::localtime(&currentTime); // Note: std::localtime n'est pas thread-safe, mais ok pour cet usage
-
-    // Format YYYY-MM-DD HH:MM:SS
-    std::stringstream ss;
-    ss << std::put_time(localTime, "%Y-%m-%d %H:%M:%S");
-    return ss.str();
-}
-
-// Ajoute une nouvelle entrée à l'historique
 void HistoryManager::addEntry(const GeoLocationData& data) {
-    // N'ajoute les entrées d'échec de géolocalisation à l'historique que si tu le souhaites.
-    // Pour l'instant, on n'ajoute que les succès.
-    if (data.isSuccess()) {
-        history.emplace_back(data, getCurrentTimestamp());
-        truncateHistory(); // S'assure que l'historique ne dépasse pas la taille maximale
-        saveHistory();     // Sauvegarde automatiquement après chaque ajout
-    } else {
-        std::cerr << TerminalDisplay::YELLOW << "Note: La géolocalisation de '" << data.getIpAddress() << "' a échoué. Non ajoutée à l'historique." << TerminalDisplay::RESET << std::endl;
-    }
-}
+    // Ajoute uniquement les entrées réussies ou les entrées avec un message spécifique si tu veux les enregistrer
+    // Correction ici : utilise getStatus() à la place de isSuccess()
+    if (data.status == "success") { // Accède directement au membre 'status' qui est public
 
-// Truncate l'historique si sa taille dépasse maxHistoryEntries
-void HistoryManager::truncateHistory() {
-    if (history.size() > maxHistoryEntries) {
-        // Supprime les entrées les plus anciennes (au début du vecteur)
-        history.erase(history.begin(), history.begin() + (history.size() - maxHistoryEntries));
-    }
-}
-
-// Charge l'historique depuis le fichier
-bool HistoryManager::loadHistory() {
-    std::ifstream file(filePath);
-    if (!file.is_open()) {
-        std::cerr << TerminalDisplay::BRIGHT_BLACK << "Fichier d'historique '" << filePath << "' non trouvé ou inaccessible. L'historique sera vide." << TerminalDisplay::RESET << std::endl;
-        return false;
-    }
-
-    try {
-        json j;
-        file >> j;
-
-        // Désérialiser le JSON dans le vecteur d'historique manuellement
-        history.clear(); // S'assurer que le vecteur est vide avant de le remplir
-        if (j.is_array()) { // S'assurer que le JSON est un tableau
-            for (const auto& entry_json : j) {
-                try {
-                    // Crée une instance vide
-                    HistoryEntry entry;
-                    // Appelle explicitement from_json pour remplir l'instance
-                    from_json(entry_json, entry);
-                    // Ajoute l'instance remplie au vecteur
-                    history.push_back(entry);
-                } catch (const json::exception& e) {
-                    std::cerr << TerminalDisplay::RED << "Avertissement: Erreur lors de la lecture d'une entrée de l'historique : " << e.what() << TerminalDisplay::RESET << std::endl;
-                    // On continue, ignorant l'entrée corrompue
-                }
-            }
-        } else {
-            std::cerr << TerminalDisplay::RED << "Avertissement: Le fichier d'historique n'est pas un tableau JSON valide. L'historique sera vide." << TerminalDisplay::RESET << std::endl;
-            history.clear();
+        historyEntries.push_back(data);
+        // Si l'historique dépasse la taille maximale, supprime les plus anciennes
+        if (historyEntries.size() > maxEntries) {
+            historyEntries.erase(historyEntries.begin());
         }
-
-        // S'assurer que l'historique chargé ne dépasse pas la taille maximale
-        truncateHistory();
-        std::cout << TerminalDisplay::BRIGHT_GREEN << "Historique chargé depuis '" << filePath << "' (" << history.size() << " entrées)." << TerminalDisplay::RESET << std::endl;
-        return true;
-    } catch (const json::parse_error& e) {
-        std::cerr << TerminalDisplay::BRIGHT_RED << "Erreur de parsing JSON dans le fichier d'historique '" << filePath << "': " << e.what() << ". L'historique sera vide." << TerminalDisplay::RESET << std::endl;
-        history.clear(); // Vide l'historique en cas d'erreur de parsing
-        return false;
-    } catch (const std::exception& e) {
-        std::cerr << TerminalDisplay::BRIGHT_RED << "Erreur inattendue lors du chargement de l'historique: " << e.what() << ". L'historique sera vide." << TerminalDisplay::RESET << std::endl;
-        history.clear();
-        return false;
+        saveHistory();
+        std::cout << TerminalDisplay::GREEN << "[Historique] Entrée ajoutée." << TerminalDisplay::RESET << std::endl;
+    } else {
+        std::cout << TerminalDisplay::YELLOW << "[Historique] Entrée non ajoutée (status non 'success')." << TerminalDisplay::RESET << std::endl;
     }
 }
 
-// Sauvegarde l'historique actuel dans le fichier
-bool HistoryManager::saveHistory() const {
-    std::ofstream file(filePath);
-    if (!file.is_open()) {
-        std::cerr << TerminalDisplay::RED << "Erreur: Impossible d'ouvrir le fichier '" << filePath << "' pour la sauvegarde de l'historique." << TerminalDisplay::RESET << std::endl;
-        return false;
-    }
 
-    try {
-        // Sauvegarde l'historique sous forme de tableau JSON
-        file << std::setw(4) << json(history) << std::endl;
-        // std::cout << "Historique sauvegardé dans '" << filePath << "'." << std::endl; // Commenté pour éviter le spam en console
-        return true;
-    } catch (const std::exception& e) {
-        std::cerr << TerminalDisplay::RED << "Erreur lors de la sauvegarde de l'historique dans '" << filePath << "': " << e.what() << TerminalDisplay::RESET << std::endl;
-        return false;
-    }
-}
-
-// Affiche tout l'historique
-void HistoryManager::displayHistory(std::ostream& os) const {
+void HistoryManager::displayHistory() const {
     using namespace TerminalDisplay;
-
-    if (history.empty()) {
-        os << YELLOW << "L'historique est vide." << RESET << std::endl;
+    if (historyEntries.empty()) {
+        std::cout << YELLOW << "L'historique est vide." << RESET << std::endl;
         return;
     }
 
-    os << BOLD << BRIGHT_GREEN << "\n--- Historique des Recherches (" << history.size() << " entrées) ---" << RESET << std::endl;
-    // Afficher du plus récent au plus ancien
-    // On copie et inverse pour ne pas modifier l'original.
-    std::vector<HistoryEntry> reversedHistory = history;
-    std::reverse(reversedHistory.begin(), reversedHistory.end());
+    std::cout << BOLD << BRIGHT_GREEN << "\n--- Historique des Recherches (" << historyEntries.size() << " entrées) ---" << RESET << std::endl;
+
+    // Affiche les entrées de la plus récente à la plus ancienne
+    std::vector<GeoLocationData> reversedHistory = historyEntries;
+    std::reverse(reversedHistory.begin(), reversedHistory.end()); // Inverse l'ordre
 
     for (size_t i = 0; i < reversedHistory.size(); ++i) {
-        os << BOLD << "Recherche #" << (reversedHistory.size() - i) << " - Date: " << BRIGHT_BLACK << reversedHistory[i].timestamp << RESET << std::endl;
-        reversedHistory[i].data.display(os); // Utilise la méthode display de GeoLocationData (qui sera colorée)
-        os << BOLD << BRIGHT_GREEN << "------------------------------------------" << RESET << std::endl;
+        std::cout << BRIGHT_CYAN << "Entrée #" << (reversedHistory.size() - i) << RESET << std::endl;
+        // Utilise la méthode display() de GeoLocationData, qui n'attend pas d'argument
+        reversedHistory[i].display();
+        std::cout << std::endl;
     }
-    os << BOLD << BRIGHT_GREEN << "Fin de l'historique." << RESET << std::endl;
+    std::cout << BOLD << BRIGHT_GREEN << "------------------------------------------" << RESET << std::endl;
 }
 
-// Efface tout l'historique
 void HistoryManager::clearHistory() {
-    history.clear();
-    saveHistory(); // Sauvegarde un fichier vide pour persister l'effacement
-    std::cout << TerminalDisplay::BRIGHT_YELLOW << "Historique effacé." << TerminalDisplay::RESET << std::endl;
+    historyEntries.clear();
+    saveHistory();
+    std::cout << TerminalDisplay::GREEN << "[Historique] Historique effacé." << TerminalDisplay::RESET << std::endl;
 }
 
-// Retourne le nombre d'entrées
-size_t HistoryManager::getEntryCount() const {
-    return history.size();
+void HistoryManager::loadHistory() {
+    std::ifstream ifs(filePath);
+    if (!ifs.is_open()) {
+        std::cerr << TerminalDisplay::YELLOW << "[Historique] Fichier historique non trouvé : " << filePath << ". Création d'un nouveau." << TerminalDisplay::RESET << std::endl;
+        return;
+    }
+
+    try {
+        nlohmann::json j;
+        ifs >> j;
+        // Désérialise directement en vector<GeoLocationData> grâce à from_json
+        historyEntries = j.get<std::vector<GeoLocationData>>();
+        // S'assurer que l'historique ne dépasse pas maxEntries après chargement
+        if (historyEntries.size() > maxEntries) {
+            historyEntries.erase(historyEntries.begin(), historyEntries.begin() + (historyEntries.size() - maxEntries));
+            std::cout << TerminalDisplay::YELLOW << "[Historique] Historique tronqué à " << maxEntries << " entrées lors du chargement." << TerminalDisplay::RESET << std::endl;
+        }
+        std::cout << TerminalDisplay::GREEN << "[Historique] " << historyEntries.size() << " entrées chargées." << TerminalDisplay::RESET << std::endl;
+    } catch (const nlohmann::json::parse_error& e) {
+        std::cerr << TerminalDisplay::BRIGHT_RED << "[Historique ERROR] Erreur de parsing du fichier historique JSON : " << e.what() << ". Fichier corrompu ?" << TerminalDisplay::RESET << std::endl;
+        historyEntries.clear(); // Efface l'historique corrompu
+    } catch (const nlohmann::json::exception& e) { // Autres erreurs liées à JSON
+        std::cerr << TerminalDisplay::BRIGHT_RED << "[Historique ERROR] Erreur JSON lors du chargement de l'historique : " << e.what() << TerminalDisplay::RESET << std::endl;
+        historyEntries.clear();
+    }
 }
 
+void HistoryManager::saveHistory() {
+    std::ofstream ofs(filePath);
+    if (!ofs.is_open()) {
+        std::cerr << TerminalDisplay::BRIGHT_RED << "[Historique ERROR] Impossible d'ouvrir le fichier historique pour écriture : " << filePath << TerminalDisplay::RESET << std::endl;
+        return;
+    }
+
+    try {
+        nlohmann::json j = historyEntries; // Sérialise directement le vector<GeoLocationData>
+        ofs << std::setw(4) << j << std::endl; // Écrit le JSON formaté
+        std::cout << TerminalDisplay::GREEN << "[Historique] Historique sauvegardé dans " << filePath << "." << TerminalDisplay::RESET << std::endl;
+    } catch (const nlohmann::json::exception& e) {
+        std::cerr << TerminalDisplay::BRIGHT_RED << "[Historique ERROR] Erreur JSON lors de la sauvegarde de l'historique : " << e.what() << TerminalDisplay::RESET << std::endl;
+    }
+}
