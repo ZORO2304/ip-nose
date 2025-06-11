@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 #ifndef HISTORYMANAGER_H
-=======
-ifndef HISTORYMANAGER_H
->>>>>>> 9621915b40066bc9ccea2304e6fbdf84277aee47
 #define HISTORYMANAGER_H
 
 #include <string>
@@ -10,7 +6,7 @@ ifndef HISTORYMANAGER_H
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include "GeoLocationData.h"
-#include "TerminalDisplay.h" // Assure-toi que c'est inclus
+#include "TerminalDisplay.h"
 
 class HistoryManager {
 public:
@@ -29,7 +25,3 @@ private:
 };
 
 #endif // HISTORYMANAGER_H
-<<<<<<< HEAD
-
-=======
->>>>>>> 9621915b40066bc9ccea2304e6fbdf84277aee47
