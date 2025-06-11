@@ -2,14 +2,20 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <memory> // Pour std::unique_ptr
-#include <algorithm> // Pour std::transform
-#include <cctype>    // Pour ::tolower
-#include <thread>   // Pour std::this_thread::sleep_for
-#include <chrono>   // Pour std::chrono::milliseconds
-#include <random>   // Pour std::default_random_engine, std::uniform_int_distribution
-#include <fstream>  // Pour la lecture de fichiers (banner.txt)
+#include <memory>        // Pour std::unique_ptr
+#include <algorithm>     // Pour std::transform
+#include <cctype>        // Pour ::tolower
+#include <thread>        // Pour std::this_thread::sleep_for
+#include <chrono>        // Pour std::chrono::milliseconds
+#include <random>        // Pour std::default_random_engine, std::uniform_int_distribution
+#include <fstream>       // Pour la lecture de fichiers (banner.txt)
+#include <sstream>       // Pour std::istringstream, std::ostringstream
+#include <regex>         // Pour std::regex, std::smatch, std::regex_search
+#include <cstdio>        // Pour popen, pclose
+#include <limits>        // Pour std::numeric_limits
+#include <iomanip>       // Pour std::fixed, std::setprecision
 
+// --- Inclure d'autres headers de ton projet ip-nose ---
 #include "HttpRequest.h"
 #include "GeoLocationData.h"
 #include "IpGeoLocator.h"
@@ -18,6 +24,87 @@
 #include "HistoryManager.h"
 #include "TerminalDisplay.h" // Pour les couleurs et l'affichage terminal
 
+// --- Nouvelles structures pour la localisation ---
+struct GeoCoord {
+    double latitude;
+    double longitude;
+};
+
+// --- Fonction pour obtenir la localisation GPS via Termux:API ---
+GeoCoord get_gps_location_termux() {
+    std::cout << TerminalDisplay::BOLD << TerminalDisplay::BRIGHT_CYAN << "\n[GPS] Tentative de récupération des coordonnées GPS via Termux:API..." << TerminalDisplay::RESET << std::endl;
+
+    // Commande termux-location pour obtenir les coordonnées
+    // -p network : utilise le fournisseur réseau (plus rapide, moins précis)
+    // -p gps : utilise le fournisseur GPS (plus lent, plus précis)
+    // -r once : obtient une seule lecture
+    // -e : affiche les erreurs JSON sur stderr (utile si des erreurs surviennent)
+    std::string command = "termux-location -p gps -r once"; // On tente le GPS pour la précision
+
+    FILE* pipe = popen(command.c_str(), "r");
+    if (!pipe) {
+        std::cerr << TerminalDisplay::BRIGHT_RED << "[GPS ERROR] Échec de l'ouverture du pipe pour la commande termux-location. Assurez-vous que 'termux-api' est installé et que l'application Termux:API est lancée avec les permissions." << TerminalDisplay::RESET << std::endl;
+        return {0.0, 0.0};
+    }
+
+    std::string json_output = "";
+    char buffer[1024];
+    while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+        json_output += buffer;
+    }
+
+    int status = pclose(pipe); // Capture le statut de sortie de la commande
+    if (status != 0) {
+        std::cerr << TerminalDisplay::BRIGHT_RED << "[GPS ERROR] La commande 'termux-location' a retourné un code d'erreur : " << status << ". Le GPS est-il activé et les permissions accordées à Termux:API ?" << TerminalDisplay::RESET << std::endl;
+        std::cerr << TerminalDisplay::BRIGHT_RED << "Sortie de la commande : " << json_output << TerminalDisplay::RESET << std::endl;
+        return {0.0, 0.0};
+    }
+
+    // Parsage du JSON pour extraire latitude et longitude
+    // Si tu utilises nlohmann/json pour ConfigManager/HistoryManager, il serait mieux de l'utiliser ici.
+    // Pour l'instant, on utilise des regex.
+    std::regex lat_regex("\"latitude\":\\s*([-+]?[0-9]*\\.?[0-9]+)");
+    std::regex lon_regex("\"longitude\":\\s*([-+]?[0-9]*\\.?[0-9]+)");
+
+    std::smatch lat_match;
+    std::smatch lon_match;
+
+    double latitude = 0.0;
+    double longitude = 0.0;
+    bool lat_found = false;
+    bool lon_found = false;
+
+    if (std::regex_search(json_output, lat_match, lat_regex) && lat_match.size() > 1) {
+        try {
+            latitude = std::stod(lat_match[1].str());
+            lat_found = true;
+        } catch (const std::exception& e) {
+            std::cerr << TerminalDisplay::BRIGHT_RED << "[GPS ERROR] Erreur de parsing latitude : " << e.what() << TerminalDisplay::RESET << std::endl;
+        }
+    }
+    if (std::regex_search(json_output, lon_match, lon_regex) && lon_match.size() > 1) {
+        try {
+            longitude = std::stod(lon_match[1].str());
+            lon_found = true;
+        } catch (const std::exception& e) {
+            std::cerr << TerminalDisplay::BRIGHT_RED << "[GPS ERROR] Erreur de parsing longitude : " << e.what() << TerminalDisplay::RESET << std::endl;
+        }
+    }
+
+    if (lat_found && lon_found) {
+        std::cout << TerminalDisplay::BOLD << TerminalDisplay::GREEN << "[GPS OK] Coordonnées GPS trouvées : " << TerminalDisplay::RESET << std::endl;
+        std::cout << TerminalDisplay::BRIGHT_MAGENTA << "  Latitude : " << std::fixed << std::setprecision(6) << latitude << TerminalDisplay::RESET << std::endl;
+        std::cout << TerminalDisplay::BRIGHT_MAGENTA << "  Longitude: " << std::fixed << std::setprecision(6) << longitude << TerminalDisplay::RESET << std::endl;
+        return {latitude, longitude};
+    } else {
+        std::cerr << TerminalDisplay::BRIGHT_RED << "[GPS ERROR] Impossible d'extraire les coordonnées GPS du JSON. Sortie : " << json_output << TerminalDisplay::RESET << std::endl;
+        return {0.0, 0.0};
+    }
+}
+
+// --- Suppression des fonctions open_in_Maps et prompt_open_in_maps ---
+// Ces fonctions sont maintenant supprimées car tu ne veux plus l'option d'ouvrir la carte.
+
 // Prototypes des fonctions d'aide et globales
 void displayHelp();
 void initializeGlobalCurl();
@@ -25,7 +112,7 @@ void cleanupGlobalCurl();
 
 void displayMatrixIntro();
 void displayCredits();
-void displayWelcomeBanner(); // Son implémentation va maintenant lire uniquement banner.txt
+void displayWelcomeBanner();
 
 int main(int argc, char* argv[]) {
     // Initialisation globale de Curl. Très important : à faire une seule fois.
@@ -64,6 +151,7 @@ int main(int argc, char* argv[]) {
         GeoLocationData result = locator.locate(inputIp);
         result.display();
         history.addEntry(result); // Ajoute à l'historique si succès
+        // Suppression de l'appel à prompt_open_in_maps ici
     } else {
         std::string arg1 = argv[1];
         std::transform(arg1.begin(), arg1.end(), arg1.begin(), ::tolower);
@@ -77,6 +165,7 @@ int main(int argc, char* argv[]) {
                 GeoLocationData result = locator.locate(publicIp);
                 result.display();
                 history.addEntry(result);
+                // Suppression de l'appel à prompt_open_in_maps ici
             } else {
                 std::cerr << TerminalDisplay::BRIGHT_RED << "Impossible de récupérer votre IP publique. Veuillez vérifier votre connexion." << TerminalDisplay::RESET << std::endl;
             }
@@ -100,12 +189,24 @@ int main(int argc, char* argv[]) {
             }
         } else if (arg1 == "--credits" || arg1 == "-r") {
             displayCredits();
+        } else if (arg1 == "--gps" || arg1 == "-g") { // NOUVELLE OPTION POUR LE GPS
+            GeoCoord gps_pos = get_gps_location_termux();
+            if (gps_pos.latitude != 0.0 || gps_pos.longitude != 0.0) { // Vérifie si la position n'est pas nulle
+                 std::cout << TerminalDisplay::BOLD << TerminalDisplay::GREEN << "\n[GPS RESULTAT]" << TerminalDisplay::RESET << std::endl;
+                 std::cout << TerminalDisplay::GREEN << "  Votre position GPS :" << TerminalDisplay::RESET << std::endl;
+                 std::cout << TerminalDisplay::BRIGHT_MAGENTA << "  Latitude : " << std::fixed << std::setprecision(6) << gps_pos.latitude << TerminalDisplay::RESET << std::endl;
+                 std::cout << TerminalDisplay::BRIGHT_MAGENTA << "  Longitude: " << std::fixed << std::setprecision(6) << gps_pos.longitude << TerminalDisplay::RESET << std::endl;
+                 // Suppression de l'appel à prompt_open_in_maps ici
+            } else {
+                std::cerr << TerminalDisplay::BRIGHT_RED << "Impossible de récupérer la position GPS. Vérifiez les prérequis." << TerminalDisplay::RESET << std::endl;
+            }
         }
         else if (Utils::isValidIP(arg1)) {
             std::cout << TerminalDisplay::CYAN << "Géolocalisation de l'IP : " << arg1 << TerminalDisplay::RESET << std::endl;
             GeoLocationData result = locator.locate(arg1);
             result.display();
             history.addEntry(result);
+            // Suppression de l'appel à prompt_open_in_maps ici
         } else {
             std::cerr << TerminalDisplay::BRIGHT_RED << "Argument invalide ou IP non reconnue : " << argv[1] << TerminalDisplay::RESET << std::endl;
             displayHelp();
@@ -125,15 +226,16 @@ void displayHelp() {
     std::cout << BOLD << BRIGHT_GREEN << "\n--- ip-nose : Localisateur d'IP (Matrix Edition) ---" << RESET << std::endl;
     std::cout << BOLD << YELLOW << "Utilisation :" << RESET << std::endl;
     std::cout << "  " << GREEN << "ip-nose" << RESET << " [OPTIONS] " << BRIGHT_CYAN << "[ADRESSE_IP]" << RESET << std::endl;
-    std::cout << BOLD << YELLOW << "\nOptions :" << RESET << std::endl;
-    std::cout << "  " << BRIGHT_CYAN << "<ADRESSE_IP>" << RESET << "     Géolocalise l'adresse IP spécifiée." << std::endl;
+    std::cout << BOLD << YELLOW << "\nOptions de Localisation :" << RESET << std::endl;
+    std::cout << "  " << BRIGHT_CYAN << "<ADRESSE_IP>" << RESET << "     Géolocalise l'adresse IP spécifiée via une API (précis)." << std::endl;
     std::cout << "                   Ex: " << BRIGHT_YELLOW << "ip-nose 8.8.8.8" << RESET << std::endl;
-    std::cout << "  " << BRIGHT_YELLOW << "--self, -s" << RESET << "       Géolocalise votre adresse IP publique." << std::endl;
+    std::cout << "  " << BRIGHT_YELLOW << "--self, -s" << RESET << "       Géolocalise votre IP publique via une API (précis)." << std::endl;
+    std::cout << "  " << BRIGHT_YELLOW << "--gps, -g" << RESET << "        Récupère votre position GPS via Termux:API (très précis)." << std::endl;
+
+    std::cout << BOLD << YELLOW << "\nOptions Générales :" << RESET << std::endl;
     std::cout << "  " << BRIGHT_YELLOW << "--history, -l" << RESET << "    Affiche l'historique des recherches." << std::endl;
     std::cout << "  " << BRIGHT_YELLOW << "--clear-history, -c" << RESET << "  Efface tout l'historique des recherches." << std::endl;
-    std::cout << "  " << BRIGHT_YELLOW << "--config, -C" << RESET << "     Affiche la configuration actuelle." << std::endl;
-    std::cout << "                   Ajouter 'reset' pour réinitialiser la config par défaut." << std::endl;
-    std::cout << "                   Ajouter 'save' pour sauvegarder la config actuelle." << std::endl;
+    std::cout << "  " << BRIGHT_YELLOW << "--config, -C" << RESET << "     Affiche/gère la configuration (reset/save)." << std::endl;
     std::cout << "                   Ex: " << BRIGHT_YELLOW << "ip-nose --config reset" << RESET << std::endl;
     std::cout << "  " << BRIGHT_YELLOW << "--credits, -r" << RESET << "    Affiche les crédits et le dépôt GitHub." << std::endl;
     std::cout << "  " << BRIGHT_YELLOW << "--help, -h" << RESET << "       Affiche cette aide." << std::endl;
@@ -155,7 +257,7 @@ void cleanupGlobalCurl() {
     curl_global_cleanup();
 }
 
-// NOUVELLE FONCTION : Affiche la bannière de bienvenue à partir d'un fichier
+// Affiche la bannière de bienvenue à partir d'un fichier
 void displayWelcomeBanner() {
     using namespace TerminalDisplay;
     TerminalDisplay::clearScreen(); // Efface l'écran avant la bannière
@@ -178,7 +280,7 @@ void displayWelcomeBanner() {
     std::this_thread::sleep_for(std::chrono::seconds(1)); // Pause de 1 seconde
 }
 
-// NOUVELLE FONCTION : Animation d'introduction style Matrix
+// Animation d'introduction style Matrix (non appelée par défaut)
 void displayMatrixIntro() {
     using namespace TerminalDisplay;
     TerminalDisplay::hideCursor(); // Cacher le curseur pour une meilleure animation
@@ -216,7 +318,7 @@ void displayMatrixIntro() {
     TerminalDisplay::showCursor(); // Afficher le curseur
 }
 
-// NOUVELLE FONCTION : Affichage des crédits avec appel à l'action GitHub
+// Affichage des crédits avec appel à l'action GitHub
 void displayCredits() {
     using namespace TerminalDisplay;
     TerminalDisplay::clearScreen();
@@ -236,4 +338,3 @@ void displayCredits() {
     std::cout << std::endl;
     std::cout << BRIGHT_BLACK << "Copyright (c) 2024 Karim93160. Tous droits réservés." << RESET << std::endl;
 }
-
