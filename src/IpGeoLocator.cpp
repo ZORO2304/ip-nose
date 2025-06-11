@@ -16,11 +16,7 @@ std::string IpGeoLocator::getPublicIp() {
         std::cerr << TerminalDisplay::BRIGHT_RED << "Erreur: Impossible de récupérer l'IP publique. Réponse vide." << TerminalDisplay::RESET << std::endl;
         return "";
     }
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> 9621915b40066bc9ccea2304e6fbdf84277aee47
     // api.ipify.org retourne juste l'IP en texte brut
     // Assumons que la réponse est propre et est l'IP
     std::cout << TerminalDisplay::GREEN << "Votre IP publique : " << response << TerminalDisplay::RESET << std::endl;
@@ -86,8 +82,3 @@ GeoLocationData IpGeoLocator::locate(const std::string& ipAddress) {
 
     return data;
 }
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 9621915b40066bc9ccea2304e6fbdf84277aee47
