@@ -44,5 +44,3 @@ private:
 };
 
 #endif // IP_GEO_LOCATOR_H
-
-
