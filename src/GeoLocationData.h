@@ -1,131 +1,67 @@
-// src/GeoLocationData.h
-#ifndef GEO_LOCATION_DATA_H
-#define GEO_LOCATION_DATA_H
+#ifndef GEOLOCATIONDATA_H
+#define GEOLOCATIONDATA_H
 
 #include <string>
-#include <iostream> // Pour std::ostream et std::cout
-#include "nlohmann/json.hpp" // AJOUTER CETTE LIGNE ICI AUSSI POUR LA SERIALISATION
+#include <iostream>
+#include <nlohmann/json.hpp> // Inclure nlohmann/json.hpp
+#include "TerminalDisplay.h"
 
-using json = nlohmann::json; // AJOUTER CETTE LIGNE ICI AUSSI
-
+// Déclaration de la classe GeoLocationData
 class GeoLocationData {
 public:
-    GeoLocationData();
-
-    // Setters (inchangés)
-    void setIpAddress(const std::string& ip);
-    void setStatus(const std::string& s);
-    void setMessage(const std::string& m);
-    void setCountry(const std::string& c);
-    void setCountryCode(const std::string& cc);
-    void setRegion(const std::string& r);
-    void setRegionName(const std::string& rn);
-    void setCity(const std::string& c);
-    void setZip(const std::string& z);
-    void setLat(double l);
-    void setLon(double l);
-    void setTimezone(const std::string& tz);
-    void setIsp(const std::string& i);
-    void setOrg(const std::string& o);
-    void setAs(const std::string& a);
-    void setReverse(const std::string& r);
-    void setMobile(bool m);
-    void setProxy(bool p);
-    void setHosting(bool h);
-
-    // Getters (inchangés, implémentation inline)
-    std::string getIpAddress() const { return ipAddress; }
-    std::string getStatus() const { return status; }
-    std::string getMessage() const { return message; }
-    std::string getCountry() const { return country; }
-    std::string getCountryCode() const { return countryCode; }
-    std::string getRegion() const { return region; }
-    std::string getRegionName() const { return regionName; }
-    std::string getCity() const { return city; }
-    std::string getZip() const { return zip; }
-    double getLat() const { return lat; }
-    double getLon() const { return lon; }
-    std::string getTimezone() const { return timezone; }
-    std::string getIsp() const { return isp; }
-    std::string getOrg() const { return org; }
-    std::string getAs() const { return as; }
-    std::string getReverse() const { return reverse; }
-    bool getMobile() const { return mobile; }
-    bool getProxy() const { return proxy; }
-    bool getHosting() const { return hosting; }
-
-
-    void display(std::ostream& os = std::cout) const;
-    bool isSuccess() const;
-
-private:
-    std::string ipAddress;
-    std::string status;
-    std::string message;
+    // Membres publics pour faciliter la sérialisation/désérialisation avec nlohmann/json
+    // Et pour correspondre aux noms d'API courants (lat, lon)
+    std::string ip;
     std::string country;
     std::string countryCode;
-    std::string region;
     std::string regionName;
     std::string city;
     std::string zip;
-    double lat;
-    double lon;
+    double lat; // Rendu public pour nlohmann/json et direct access (comme l'API)
+    double lon; // Rendu public pour nlohmann/json et direct access (comme l'API)
     std::string timezone;
     std::string isp;
     std::string org;
     std::string as;
-    std::string reverse;
-    bool mobile;
-    bool proxy;
-    bool hosting;
+    std::string status;
+    std::string message; // Pour les messages d'erreur de l'API par exemple
+
+    // Ces membres semblent être spécifiques à des APIs et si elles ne sont pas toujours présentes,
+    // nlohmann::json gérera les champs manquants si tu les laisses publics dans le constructeur.
+    // Si tu avais 'region', 'reverse', 'mobile', 'proxy', 'hosting', il faut les ajouter ici aussi
+    // et les implémenter dans le .cpp si tu veux qu'ils soient sérialisés.
+    // Pour l'instant, je m'en tiens aux membres que tu as déjà définis ou que j'ai ajoutés précédemment.
+    // Par exemple, si tu as bien `region`, `reverse`, etc. dans ton .cpp, décommente ou ajoute-les ici:
+    // std::string region;
+    // std::string reverse;
+    // bool mobile;
+    // bool proxy;
+    // bool hosting;
+
+
+    // Constructeur par défaut
+    GeoLocationData() : ip("N/A"), country("N/A"), countryCode("N/A"), regionName("N/A"),
+                        city("N/A"), zip("N/A"), lat(0.0), lon(0.0),
+                        timezone("N/A"), isp("N/A"), org("N/A"), as("N/A"), status("N/A"), message("N/A") {}
+
+    // Méthode pour afficher les détails
+    void display() const; // Déclaration uniquement, l'implémentation est dans le .cpp
+
+    // Pas besoin de getters/setters si les membres sont publics et qu'ils sont utilisés directement
+    // par nlohmann/json via les fonctions to_json/from_json que nous allons définir.
+    // Cependant, si d'autres parties de ton code utilisent les getters/setters, tu peux les conserver.
+    // Pour la clarté et pour éviter des conflits, je les ai retirés du .h ici si les membres sont publics.
+    // Si tu veux les garder, les membres privés devront être de retour et les getters/setters gérés.
+    // Pour la sérialisation avec nlohmann/json, il est souvent plus simple de rendre les membres publics
+    // ou de définir les fonctions friend `to_json`/`from_json` qui accèdent aux membres privés.
+    // Gardons-les publics pour la sérialisation simple.
 };
 
-// Fonctions de sérialisation/désérialisation pour nlohmann/json
-// DOIVENT ÊTRE DANS LE MÊME FICHIER D'EN-TÊTE QUE LA CLASSE POUR L'ADL
-inline void to_json(json& j, const GeoLocationData& d) {
-    j = json::object();
-    j["ipAddress"] = d.getIpAddress();
-    j["status"] = d.getStatus();
-    j["message"] = d.getMessage();
-    j["country"] = d.getCountry();
-    j["countryCode"] = d.getCountryCode();
-    j["region"] = d.getRegion();
-    j["regionName"] = d.getRegionName();
-    j["city"] = d.getCity();
-    j["zip"] = d.getZip();
-    j["lat"] = d.getLat();
-    j["lon"] = d.getLon();
-    j["timezone"] = d.getTimezone();
-    j["isp"] = d.getIsp();
-    j["org"] = d.getOrg();
-    j["as"] = d.getAs();
-    j["reverse"] = d.getReverse();
-    j["mobile"] = d.getMobile();
-    j["proxy"] = d.getProxy();
-    j["hosting"] = d.getHosting();
-}
+// Fonctions to_json et from_json pour nlohmann/json
+// Ces fonctions doivent être dans le même namespace que GeoLocationData
+// ou dans le namespace global si GeoLocationData est dans le namespace global.
+// Elles permettent à nlohmann::json de sérialiser/désérialiser GeoLocationData.
+void to_json(nlohmann::json& j, const GeoLocationData& p);
+void from_json(const nlohmann::json& j, GeoLocationData& p);
 
-inline void from_json(const json& j, GeoLocationData& d) {
-    d.setIpAddress(j.value("ipAddress", ""));
-    d.setStatus(j.value("status", ""));
-    d.setMessage(j.value("message", ""));
-    d.setCountry(j.value("country", ""));
-    d.setCountryCode(j.value("countryCode", ""));
-    d.setRegion(j.value("region", ""));
-    d.setRegionName(j.value("regionName", ""));
-    d.setCity(j.value("city", ""));
-    d.setZip(j.value("zip", ""));
-    d.setLat(j.value("lat", 0.0));
-    d.setLon(j.value("lon", 0.0));
-    d.setTimezone(j.value("timezone", ""));
-    d.setIsp(j.value("isp", ""));
-    d.setOrg(j.value("org", ""));
-    d.setAs(j.value("as", ""));
-    d.setReverse(j.value("reverse", ""));
-    d.setMobile(j.value("mobile", false));
-    d.setProxy(j.value("proxy", false));
-    d.setHosting(j.value("hosting", false));
-}
-
-#endif // GEO_LOCATION_DATA_H
-
+#endif // GEOLOCATIONDATA_H
