@@ -52,7 +52,3 @@ size_t HttpRequest::WriteCallback(void* contents, size_t size, size_t nmemb, voi
 void HttpRequest::setVerbose(bool verbose) {
     verboseMode = verbose;
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> 9621915b40066bc9ccea2304e6fbdf84277aee47
