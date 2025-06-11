@@ -1,84 +1,84 @@
 # Makefile for ip-nose
 
-# Compilateur C++
+# C++ Compiler
 CXX = clang++
 
-# Flags de compilation
-# -std=c++17 : utilise la norme C++17 (nécessaire pour regex, chrono, etc.)
-# -Wall -Wextra -pedantic : active un grand nombre d'avertissements pour un code de meilleure qualité
-# -I : inclut le chemin vers les headers. On ajoute le répertoire 'include' et 'src' pour nos propres headers
+# Compilation Flags
+# -std=c++17: uses C++17 standard (needed for regex, chrono, etc.)
+# -Wall -Wextra -pedantic: enables many warnings for better code quality
+# -I: includes path to headers. Adding 'include' and 'src' directories for our own headers
 CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic -I./include -I./src
 
-# Bibliothèques à lier
-# -lcurl : pour la bibliothèque curl
-# La bibliothèque mathématique (-lm) n'est plus nécessaire après la suppression de l'algorithme de triangulation avancé.
+# Libraries to link
+# -lcurl: for the curl library
+# The mathematical library (-lm) is no longer necessary after removing the advanced triangulation algorithm.
 LIBS = -lcurl
 
-# Répertoires
+# Directories
 SRC_DIR = src
 BUILD_DIR = build
 OBJ_DIR = $(BUILD_DIR)/obj
 
-# Fichiers sources
+# Source files
 SRCS = $(wildcard $(SRC_DIR)/*.cpp)
 
-# Fichiers objets correspondants
+# Corresponding object files
 OBJS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
 
-# Nom de l'exécutable final
+# Final executable name
 TARGET = $(BUILD_DIR)/ip-nose
 
-# Répertoire d'installation pour l'exécutable
-# Sur Termux, /data/data/com.termux/files/usr/bin/ est un bon choix pour les binaires
+# Installation directory for the executable
+# On Termux, /data/data/com.termux/files/usr/bin/ is a good choice for binaries
 INSTALL_DIR = /data/data/com.termux/files/usr/bin
 
-# Ajout de 'install' et 'uninstall' à la liste des "phony targets"
+# Add 'install' and 'uninstall' to the list of "phony targets"
 .PHONY: all clean run debug install uninstall
 
 all: $(TARGET)
 
-# Règle pour l'exécutable final
+# Rule for the final executable
 $(TARGET): $(OBJ_DIR) $(OBJS)
-        @echo "Linking $(TARGET)..."
-        $(CXX) $(OBJS) -o $@ $(LIBS)
+	@echo "Linking $(TARGET)..."
+	$(CXX) $(OBJS) -o $@ $(LIBS)
 
-# Règle pour créer le répertoire des objets
+# Rule to create the object directory
 $(OBJ_DIR):
-        @echo "Creating object directory: $@"
-        @mkdir -p $@
+	@echo "Creating object directory: $@"
+	@mkdir -p $@
 
-# Règle générique pour compiler les fichiers source en objets
+# Generic rule to compile source files into objects
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-        @echo "Compiling $<..."
-        $(CXX) $(CXXFLAGS) -c $< -o $@
+	@echo "Compiling $<..."
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Règle clean : supprime les fichiers compilés et le répertoire build
+# Clean rule: deletes compiled files and the build directory
 clean:
-        @echo "Cleaning up build directory..."
-        @rm -rf $(BUILD_DIR)
+	@echo "Cleaning up build directory..."
+	@rm -rf $(BUILD_DIR)
 
-# Règle run : compile et exécute le programme
-# Utilise RUN_ARGS pour passer des arguments à l'exécutable
+# Run rule: compiles and executes the program
+# Uses RUN_ARGS to pass arguments to the executable
 run: all
-        @echo "Running $(TARGET)..."
-        $(TARGET) $(RUN_ARGS)
+	@echo "Running $(TARGET)..."
+	$(TARGET) $(RUN_ARGS)
 
-# Règle debug : compile en mode debug avec gdb (si gdb est installé sur Termux)
-debug: CXXFLAGS += -g # Ajoute le flag -g pour les infos de debug
+# Debug rule: compiles in debug mode with gdb (if gdb is installed on Termux)
+debug: CXXFLAGS += -g # Adds -g flag for debug info
 debug: all
-        @echo "Running $(TARGET) with GDB..."
-        gdb $(TARGET)
+	@echo "Running $(TARGET) with GDB..."
+	gdb $(TARGET)
 
-# Nouvelle règle : install
-# Installe l'exécutable dans un répertoire du PATH
+# New rule: install
+# Installs the executable in a directory on the PATH
 install: all
-        @echo "Installing $(TARGET) to $(INSTALL_DIR)/$(notdir $(TARGET))..."
-        @rm -f $(INSTALL_DIR)/$(notdir $(TARGET))
-        @ln -s $(realpath $(TARGET)) $(INSTALL_DIR)/$(notdir $(TARGET))
-        @echo "$(notdir $(TARGET)) installé. Tu peux maintenant l'exécuter en tapant '$(notdir $(TARGET))'."
+	@echo "Installing $(TARGET) to $(INSTALL_DIR)/$(notdir $(TARGET))..."
+	@rm -f $(INSTALL_DIR)/$(notdir $(TARGET))
+	@ln -s $(realpath $(TARGET)) $(INSTALL_DIR)/$(notdir $(TARGET))
+	@echo "$(notdir $(TARGET)) installed. You can now run it by typing '$(notdir $(TARGET))'."
 
-# Nouvelle règle : uninstall (optionnel, pour nettoyer l'installation)
+# New rule: uninstall (optional, for cleaning up the installation)
 uninstall:
-        @echo "Uninstalling $(notdir $(TARGET)) from $(INSTALL_DIR)/..."
-        @rm -f $(INSTALL_DIR)/$(notdir $(TARGET))
-        @echo "$(notdir $(TARGET)) désinstallé."
+	@echo "Uninstalling $(notdir $(TARGET)) from $(INSTALL_DIR)/..."
+	@rm -f $(INSTALL_DIR)/$(notdir $(TARGET))
+	@echo "$(notdir $(TARGET)) uninstalled."
