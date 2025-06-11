@@ -81,8 +81,3 @@ void from_json(const nlohmann::json& j, GeoLocationData& p) {
     // if (j.find("proxy") != j.end() && !j.at("proxy").is_null()) { p.proxy = j.at("proxy"); }
     // if (j.find("hosting") != j.end() && !j.at("hosting").is_null()) { p.hosting = j.at("hosting"); }
 }
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 9621915b40066bc9ccea2304e6fbdf84277aee47
