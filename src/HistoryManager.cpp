@@ -57,7 +57,7 @@ void HistoryManager::clearHistory() {
 void HistoryManager::loadHistory() {
     std::ifstream ifs(filePath);
     if (!ifs.is_open()) {
-        std::cerr << TerminalDisplay::YELLOW << "[Historique] Fichier historique non trouvé : " << filePath << ". Création d'un nouveau." << TerminalDisplay::RESET << std::endl;
+        std::cerr << TerminalDisplay::YELLOW << "[Historique] Fichier historique non trouvé : " << filePath << ". Création d'un nouveau." << TerminalDisp>
         return;
     }
 
@@ -69,14 +69,14 @@ void HistoryManager::loadHistory() {
         // S'assurer que l'historique ne dépasse pas maxEntries après chargement
         if (historyEntries.size() > maxEntries) {
             historyEntries.erase(historyEntries.begin(), historyEntries.begin() + (historyEntries.size() - maxEntries));
-            std::cout << TerminalDisplay::YELLOW << "[Historique] Historique tronqué à " << maxEntries << " entrées lors du chargement." << TerminalDisplay::RESET << std::endl;
+            std::cout << TerminalDisplay::YELLOW << "[Historique] Historique tronqué à " << maxEntries << " entrées lors du chargement." << TerminalDispl>
         }
         std::cout << TerminalDisplay::GREEN << "[Historique] " << historyEntries.size() << " entrées chargées." << TerminalDisplay::RESET << std::endl;
     } catch (const nlohmann::json::parse_error& e) {
-        std::cerr << TerminalDisplay::BRIGHT_RED << "[Historique ERROR] Erreur de parsing du fichier historique JSON : " << e.what() << ". Fichier corrompu ?" << TerminalDisplay::RESET << std::endl;
+        std::cerr << TerminalDisplay::BRIGHT_RED << "[Historique ERROR] Erreur de parsing du fichier historique JSON : " << e.what() << ". Fichier corrom>
         historyEntries.clear(); // Efface l'historique corrompu
     } catch (const nlohmann::json::exception& e) { // Autres erreurs liées à JSON
-        std::cerr << TerminalDisplay::BRIGHT_RED << "[Historique ERROR] Erreur JSON lors du chargement de l'historique : " << e.what() << TerminalDisplay::RESET << std::endl;
+        std::cerr << TerminalDisplay::BRIGHT_RED << "[Historique ERROR] Erreur JSON lors du chargement de l'historique : " << e.what() << TerminalDisplay>
         historyEntries.clear();
     }
 }
@@ -84,7 +84,7 @@ void HistoryManager::loadHistory() {
 void HistoryManager::saveHistory() {
     std::ofstream ofs(filePath);
     if (!ofs.is_open()) {
-        std::cerr << TerminalDisplay::BRIGHT_RED << "[Historique ERROR] Impossible d'ouvrir le fichier historique pour écriture : " << filePath << TerminalDisplay::RESET << std::endl;
+        std::cerr << TerminalDisplay::BRIGHT_RED << "[Historique ERROR] Impossible d'ouvrir le fichier historique pour écriture : " << filePath << Termin>
         return;
     }
 
@@ -93,6 +93,6 @@ void HistoryManager::saveHistory() {
         ofs << std::setw(4) << j << std::endl; // Écrit le JSON formaté
         std::cout << TerminalDisplay::GREEN << "[Historique] Historique sauvegardé dans " << filePath << "." << TerminalDisplay::RESET << std::endl;
     } catch (const nlohmann::json::exception& e) {
-        std::cerr << TerminalDisplay::BRIGHT_RED << "[Historique ERROR] Erreur JSON lors de la sauvegarde de l'historique : " << e.what() << TerminalDisplay::RESET << std::endl;
+        std::cerr << TerminalDisplay::BRIGHT_RED << "[Historique ERROR] Erreur JSON lors de la sauvegarde de l'historique : " << e.what() << TerminalDisp>
     }
 }
