@@ -63,10 +63,5 @@ public:
 // Elles permettent à nlohmann::json de sérialiser/désérialiser GeoLocationData.
 void to_json(nlohmann::json& j, const GeoLocationData& p);
 void from_json(const nlohmann::json& j, GeoLocationData& p);
-<<<<<<< HEAD
-
-#endif // GEOLOCATIONDATA_H
-=======
->>>>>>> 9621915b40066bc9ccea2304e6fbdf84277aee47
 
 #endif // GEOLOCATIONDATA_H
