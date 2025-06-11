@@ -1,137 +1,84 @@
-// src/IpGeoLocator.cpp
 #include "IpGeoLocator.h"
+#include <nlohmann/json.hpp> // Pour le parsing JSON
 #include <iostream>
 
-// Définition des constantes statiques
-const std::string IpGeoLocator::GEO_API_URL = "http://ip-api.com/json/";
-const std::string IpGeoLocator::PUBLIC_IP_DETECTOR_URL = "https://api.ipify.org";
-
-// Constructeur
-IpGeoLocator::IpGeoLocator(HttpRequest& req) : httpRequest(req), lastErrorMsg("") {
-    // Le constructeur initialise la référence à l'objet HttpRequest.
-    // Il peut aussi configurer des options par défaut pour HttpRequest ici,
-    // comme le User-Agent ou le timeout, si cela n'est pas déjà fait ailleurs.
-    httpRequest.setUserAgent("ip-nose-geo-locator/1.0");
-    httpRequest.setTimeout(15); // Timeout de 15 secondes pour les requêtes API
+// Implémentation du constructeur
+IpGeoLocator::IpGeoLocator(HttpRequest& req) : httpRequest(req) {
+    // Les membres de GeoLocationData sont maintenant publics, donc on n'utilise plus les setters ici
 }
 
-// Méthode pour géolocaliser une IP donnée
-GeoLocationData IpGeoLocator::locate(const std::string& ipAddress) {
-    lastErrorMsg.clear(); // Réinitialise le message d'erreur
-    GeoLocationData data; // Crée un objet pour stocker les résultats
-    data.setIpAddress(ipAddress); // Enregistre l'IP que nous tentons de localiser
-
-    // Construire l'URL complète pour la requête de géolocalisation
-    std::string fullUrl = GEO_API_URL + ipAddress;
-    httpRequest.setUrl(fullUrl);
-
-    // Effectuer la requête HTTP
-    std::string jsonResponse = httpRequest.get();
-
-    // Vérifier s'il y a eu une erreur au niveau de la requête HTTP (CURL)
-    if (httpRequest.getLastError() != CURLE_OK) {
-        lastErrorMsg = "Erreur HTTP lors de la géolocalisation de " + ipAddress + ": " + httpRequest.getLastErrorString();
-        data.setStatus("fail");
-        data.setMessage(lastErrorMsg);
-        std::cerr << lastErrorMsg << std::endl;
-        return data; // Retourne les données avec le statut d'échec
-    }
-
-    // Si la requête HTTP a réussi, parser la réponse JSON
-    if (!jsonResponse.empty()) {
-        data = parseJsonResponse(jsonResponse, ipAddress);
-        // La méthode parseJsonResponse gère déjà les erreurs de parsing JSON
-        // et les statuts "fail" de l'API.
-    } else {
-        lastErrorMsg = "Réponse vide reçue pour la géolocalisation de " + ipAddress;
-        data.setStatus("fail");
-        data.setMessage(lastErrorMsg);
-        std::cerr << lastErrorMsg << std::endl;
-    }
-    return data;
-}
-
-// Méthode pour obtenir l'IP publique de la machine locale
+// Fonction pour récupérer l'IP publique de l'utilisateur
 std::string IpGeoLocator::getPublicIp() {
-    lastErrorMsg.clear(); // Réinitialise le message d'erreur
+    std::string publicIpEndpoint = "https://api.ipify.org"; // Un service simple pour obtenir l'IP publique
+    std::string response = httpRequest.get(publicIpEndpoint);
 
-    httpRequest.setUrl(PUBLIC_IP_DETECTOR_URL);
-    std::string publicIp = httpRequest.get();
-
-    if (httpRequest.getLastError() != CURLE_OK) {
-        lastErrorMsg = "Erreur HTTP lors de la détection de l'IP publique: " + httpRequest.getLastErrorString();
-        std::cerr << lastErrorMsg << std::endl;
-        return ""; // Retourne une chaîne vide en cas d'erreur
+    if (response.empty()) {
+        std::cerr << TerminalDisplay::BRIGHT_RED << "Erreur: Impossible de récupérer l'IP publique. Réponse vide." << TerminalDisplay::RESET << std::endl;
+        return "";
     }
 
-    // ipify.org renvoie juste l'IP en texte brut, pas du JSON
-    if (publicIp.empty()) {
-        lastErrorMsg = "Impossible de récupérer l'IP publique, réponse vide.";
-        std::cerr << lastErrorMsg << std::endl;
-    }
-
-    return publicIp;
+    // api.ipify.org retourne juste l'IP en texte brut
+    // Assumons que la réponse est propre et est l'IP
+    std::cout << TerminalDisplay::GREEN << "Votre IP publique : " << response << TerminalDisplay::RESET << std::endl;
+    return response;
 }
 
-// Méthode privée pour parser la réponse JSON et remplir GeoLocationData
-GeoLocationData IpGeoLocator::parseJsonResponse(const std::string& jsonResponse, const std::string& targetIp) {
-    GeoLocationData data;
-    data.setIpAddress(targetIp); // S'assurer que l'IP est définie dans l'objet de données
+// Fonction pour géolocaliser une IP donnée
+GeoLocationData IpGeoLocator::locate(const std::string& ipAddress) {
+    GeoLocationData data; // Crée un nouvel objet GeoLocationData
+
+    // Stocke l'IP que nous tentons de localiser directement dans le membre public 'ip'
+    data.ip = ipAddress; // Utilise le membre public 'ip'
+
+    std::string apiUrl = "http://ip-api.com/json/" + ipAddress;
+    // Ajoute un paramètre fields pour obtenir les champs dont tu as besoin et potentiellement le message d'erreur
+    apiUrl += "?fields=status,message,country,countryCode,regionName,city,zip,lat,lon,timezone,isp,org,as,query";
+
+    std::string jsonResponse = httpRequest.get(apiUrl);
+
+    if (jsonResponse.empty()) {
+        std::cerr << TerminalDisplay::BRIGHT_RED << "Erreur: Réponse vide de l'API de géolocalisation." << TerminalDisplay::RESET << std::endl;
+        // Met à jour le statut et le message directement
+        data.status = "fail";
+        data.message = "Empty API response";
+        return data;
+    }
 
     try {
-        json j = json::parse(jsonResponse);
+        nlohmann::json j = nlohmann::json::parse(jsonResponse);
 
-        // Vérifier le statut de la réponse de l'API (ip-api.com)
+        // Assigner les valeurs directement aux membres publics de GeoLocationData
+        // Utilise .value() pour obtenir une valeur par défaut si le champ est absent
         std::string status = j.value("status", "fail");
-        data.setStatus(status);
+        data.status = status; // Assigner le statut directement
 
         if (status == "success") {
-            data.setCountry(j.value("country", "N/A"));
-            data.setCountryCode(j.value("countryCode", "N/A"));
-            data.setRegion(j.value("region", "N/A"));
-            data.setRegionName(j.value("regionName", "N/A"));
-            data.setCity(j.value("city", "N/A"));
-            data.setZip(j.value("zip", "N/A"));
-            data.setLat(j.value("lat", 0.0));
-            data.setLon(j.value("lon", 0.0));
-            data.setTimezone(j.value("timezone", "N/A"));
-            data.setIsp(j.value("isp", "N/A"));
-            data.setOrg(j.value("org", "N/A"));
-            data.setAs(j.value("as", "N/A"));
-            data.setReverse(j.value("reverse", "N/A"));
-            data.setMobile(j.value("mobile", false)); // Booléen
-            data.setProxy(j.value("proxy", false));   // Booléen
-            data.setHosting(j.value("hosting", false)); // Booléen
+            data.country = j.value("country", "N/A");
+            data.countryCode = j.value("countryCode", "N/A");
+            data.regionName = j.value("regionName", "N/A");
+            data.city = j.value("city", "N/A");
+            data.zip = j.value("zip", "N/A");
+            data.lat = j.value("lat", 0.0);
+            data.lon = j.value("lon", 0.0);
+            data.timezone = j.value("timezone", "N/A");
+            data.isp = j.value("isp", "N/A");
+            data.org = j.value("org", "N/A");
+            data.as = j.value("as", "N/A");
+            data.message = ""; // Pas de message d'erreur en cas de succès
+            // data.ip = j.value("query", ipAddress); // L'API renvoie la même IP, mais tu peux la mettre à jour
         } else {
-            // Si le statut est "fail", l'API peut fournir un message d'erreur.
-            data.setMessage(j.value("message", "Erreur inconnue de l'API de géolocalisation."));
-            lastErrorMsg = "API de géolocalisation a rapporté un échec: " + data.getMessage();
-            std::cerr << lastErrorMsg << std::endl;
+            // Si le statut est "fail", récupère le message d'erreur de l'API
+            data.message = j.value("message", "Unknown error");
         }
-
-    } catch (const json::parse_error& e) {
-        lastErrorMsg = "Erreur de parsing JSON pour l'IP " + targetIp + ": " + e.what();
-        data.setStatus("fail");
-        data.setMessage(lastErrorMsg);
-        std::cerr << lastErrorMsg << std::endl;
-    } catch (const std::exception& e) {
-        lastErrorMsg = "Erreur inattendue lors du traitement de la réponse pour l'IP " + targetIp + ": " + e.what();
-        data.setStatus("fail");
-        data.setMessage(lastErrorMsg);
-        std::cerr << lastErrorMsg << std::endl;
+    } catch (const nlohmann::json::parse_error& e) {
+        std::cerr << TerminalDisplay::BRIGHT_RED << "Erreur de parsing JSON pour la géolocalisation : " << e.what() << TerminalDisplay::RESET << std::endl;
+        data.status = "fail";
+        data.message = "JSON parsing error: " + std::string(e.what());
+    } catch (const nlohmann::json::exception& e) {
+        std::cerr << TerminalDisplay::BRIGHT_RED << "Erreur JSON pour la géolocalisation : " << e.what() << TerminalDisplay::RESET << std::endl;
+        data.status = "fail";
+        data.message = "JSON error: " + std::string(e.what());
     }
 
     return data;
 }
-
-// Retourne le dernier message d'erreur
-std::string IpGeoLocator::getLastError() const {
-    return lastErrorMsg;
-}
-
-// Indique si une erreur est survenue
-bool IpGeoLocator::hasError() const {
-    return !lastErrorMsg.empty();
-}
-
-
