@@ -1,26 +1,27 @@
-#ifndef HTTPREQUEST_H
-#define HTTPREQUEST_H
+ifndef HISTORYMANAGER_H
+#define HISTORYMANAGER_H
 
 #include <string>
-#include <curl/curl.h> // Inclure la bibliothèque curl
+#include <vector>
+#include <fstream>
+#include <nlohmann/json.hpp>
+#include "GeoLocationData.h"
+#include "TerminalDisplay.h" // Assure-toi que c'est inclus
 
-class HttpRequest {
+class HistoryManager {
 public:
-    HttpRequest();
-    ~HttpRequest();
-
-    // Méthode GET pour effectuer une requête HTTP
-    std::string get(const std::string& url); // Assure-toi que cette ligne est correcte
-
-    void setVerbose(bool verbose);
+    HistoryManager(const std::string& filePath, size_t maxEntries = 100);
+    void addEntry(const GeoLocationData& data);
+    void displayHistory() const;
+    void clearHistory();
 
 private:
-    CURL* curl; // Handle CURL
-    std::string responseBuffer; // Buffer pour stocker la réponse HTTP
-    bool verboseMode; // Pour activer/désactiver la sortie verbose de curl
+    std::string filePath;
+    size_t maxEntries;
+    std::vector<GeoLocationData> historyEntries;
 
-    // Callback statique pour écrire les données reçues
-    static size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp);
+    void loadHistory();
+    void saveHistory();
 };
 
-#endif // HTTPREQUEST_H
+#endif // HISTORYMANAGER_H
