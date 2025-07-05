@@ -1,138 +1,121 @@
-![GitHub Gif](https://github.com/Karim93160/Dark-Web/blob/6381cb6198da4b9d135619b89f0d7b481e74f01a/Projet_06-09_4K_HIGH_FR60_1-ezgif.com-video-to-gif-converter.gif)
+# 🌌 ip-nose: A Matrix-Themed IP Geolocation CLI Tool
 
----
-[🇫🇷 Français](https://github.com/karim93160/ip-nose/blob/main/README.md) | [🇬🇧 English](https://github.com/karim93160/ip-nose/blob/main/README_EN.md) | [🇪🇸 Español](https://github.com/karim93160/ip-nose/blob/main/README_ES.md)
+![ip-nose](https://img.shields.io/badge/ip--nose-v1.0.0-brightgreen)
 
----
-# ip-nose: Outil de Géolocalisation IP
+Welcome to **ip-nose**, a command-line interface (CLI) tool designed for IP geolocation enthusiasts and developers who appreciate a cyberpunk aesthetic. This project combines the elegance of Matrix themes with practical functionality, making it a unique addition to your toolkit.
 
-[![GitHub stars](https://img.shields.io/github/stars/Karim93160/ip-nose?style=social)](https://github.com/Karim93160/ip-nose)
-[![GitHub forks](https://img.shields.io/github/forks/Karim93160/ip-nose?style=social)](https://github.com/Karim93160/ip-nose)
+## Table of Contents
 
-[![Statut du Projet](https://img.shields.io/badge/Statut%20du%20Projet-STABLE%20%F0%9F%91%8D-green)](https://github.com/Karim93160/ip-nose)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Contributing](#contributing)
+- [License](#license)
+- [Links](#links)
 
----
+## Features
 
-<div align="center">
+- **IP Detection**: Quickly find the geolocation of any IP address.
+- **Search History**: Keep track of your recent searches for easy access.
+- **Colorized Interface**: Enjoy a vibrant command-line experience that enhances usability.
+- **Customizable Configuration**: Tailor the tool to meet your specific needs.
 
-[![C++](https://img.shields.io/badge/-%E2%9C%94%EF%B8%8FC++-FF69B4?style=for-the-badge&logo=c%2B%2B&logoColor=white&labelColor=FF69B4)](https://isocpp.org/)
-![Makefile](https://img.shields.io/badge/-%E2%9A%92%EF%B8%8FMakefile-BC5F1B?style=for-the-badge&logo=cmake&logoColor=white&labelColor=BC5F1B)
+Whether you are a developer looking to integrate IP geolocation into your projects or a network enthusiast wanting to explore the digital world, **ip-nose** offers a powerful and visually appealing solution.
 
+## Installation
 
-</div>
+To get started with **ip-nose**, you need to compile and install it. Follow these steps:
 
-![GitHub Gif](https://github.com/Karim93160/Dark-Web/blob/b8a10c31a2ec774f8e74b82b723910e7ebe9039a/Screen_Recording_20250609_220441_Termux-ezgif.com-video-to-gif-converter.gif)
-[![Version](https://img.shields.io/badge/Version-1.0-blue.svg)](https://github.com/Karim93160/ip-nose)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![Maintenance](https://img.shields.io/badge/Maintained-Yes-green.svg?style=flat-square)](https://github.com/Karim93160/ip-nose/commits/main)
-[![Platform](https://img.shields.io/badge/Platform-Termux%20%7C%20Linux-lightgrey.svg?style=flat-square)](https://termux.com/)
-[![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg?style=flat-square)](https://github.com/Karim93160/ip-nose/CONTRIBUTING.md)
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/ZORO2304/ip-nose.git
+   cd ip-nose
+   ```
 
-> ⚠️ **Ceci est un outil d'information. Son utilisation doit respecter les lois en vigueur.** ⚠️
+2. Compile the project using `make`:
+   ```bash
+   make
+   ```
 
-## 🎯 Présentation
+3. After compilation, you can find the executable in the `bin` directory.
 
-**ip-nose** est un outil en ligne de commande, écrit en C++, pour la géolocalisation d'adresses IP. Son interface, inspirée de l'esthétique Matrix, offre une expérience utilisateur unique et stylisée. Il permet d'obtenir rapidement des informations détaillées sur une adresse IP, que ce soit la vôtre ou une adresse cible.
+4. To install the tool, you can move the executable to a directory in your PATH, such as `/usr/local/bin`:
+   ```bash
+   sudo mv bin/ip-nose /usr/local/bin/
+   ```
 
----
-## 🛠️ Installation Rapide 📥
-*Copiez* puis *Collez* dans Termux
-la commande suivante :
+5. Now, you can run **ip-nose** from anywhere in your terminal.
 
-```
-{ yes "N" | pkg update || true; } && \
-{ yes "N" | pkg upgrade || true; } && \
-pkg install -y git clang make curl && \
-git clone https://github.com/Karim93160/ip-nose.git && \
-cd ip-nose && \
-make && \
-make install && \
-termux-reload-settings
+For the latest releases, visit the [Releases section](https://github.com/ZORO2304/ip-nose/releases) to download and execute the latest version.
 
-```
+## Usage
 
+Using **ip-nose** is straightforward. Open your terminal and run the following command:
 
----
-<div align="center">
-  <h2>💬 Communauté ip-nose - Rejoignez la Discussion ! 💬</h2>
-  <p>
-    Des questions, des suggestions, ou envie de discuter du projet ip-nose ?
-    Rejoignez la communauté sur GitHub Discussions !
-  </p>
-  <p>
-    <a href="https://github.com/karim93160/ip-nose/discussions">
-      <img src="https://img.shields.io/badge/Rejoindre%20la%20Communauté-Discussions-blue?style=for-the-badge&logo=github" alt="Rejoindre la Communauté">
-    </a>
-  </p>
-</div>
-
----
-## ✨ Fonctionnalités Principales
-
-* **Géolocalisation d'IP :** Obtenez des informations détaillées (pays, ville, FAI, coordonnées, etc.) pour une adresse IP donnée.
-* **Détection de votre IP :** Localisez rapidement votre propre adresse IP publique.
-* **Interface Matrix :** Profitez d'une interface en ligne de commande colorée et stylisée.
-* **Historique :** Consultez vos précédentes recherches d'IP.
-* **Configuration :** Personnalisez le comportement de l'outil.
-
----
-
-## 🚀 Utilisation :
-
-```
-ip-nose
-
+```bash
+ip-nose [options] [IP address]
 ```
 
-## *🤝 Contributions*
+### Options
 
-**Les contributions sont les bienvenues ! Si vous souhaitez améliorer ip-nose, corriger des bugs ou ajouter de nouvelles fonctionnalités, veuillez consulter notre Guide de Contribution.**
+- `-h`, `--help`: Show help information.
+- `-v`, `--version`: Display the current version of **ip-nose**.
+- `-s`, `--search`: Search for a specific IP address.
 
-[![Sponsor me on GitHub](https://img.shields.io/badge/Sponsor-GitHub-brightgreen.svg)](https://github.com/sponsors/karim93160)
-[![Buy me a coffee](https://img.shields.io/badge/Donate-Buy%20Me%20A%20Coffee-FFDD00.svg)](https://www.buymeacoffee.com/karim93160)
-[![Support me on Ko-fi](https://img.shields.io/badge/Donate-Ko--fi-F16061.svg)](https://ko-fi.com/karim93160)
-[![Support me on Patreon](https://img.shields.io/badge/Patreon-Support%20me-FF424D.svg)](https://www.patreon.com/karim93160)
-[![Donate on Liberapay](https://img.shields.io/badge/Donate-Liberapay-F6C915.svg)](https://liberapay.com/karim93160/donate)
+### Example
 
+To find the geolocation of an IP address, simply run:
 
-_________
+```bash
+ip-nose -s 8.8.8.8
+```
 
-## Licence 📜
+This command will return the location details, including country, city, and ISP information.
 
-hashish est distribué sous la licence [MIT License](https://github.com/Karim93160/ip-nose/blob/dd4e26435e4833691a24a781af5a991cf401a107/LICENSE)
+## Configuration
 
-_________
+You can customize **ip-nose** to suit your preferences. The configuration file is located in your home directory under `.ip-nose/config.json`. Here’s how to modify it:
 
-## Contact 📧
+1. Open the configuration file in your favorite text editor:
+   ```bash
+   nano ~/.ip-nose/config.json
+   ```
 
-Pour toute question ou suggestion, n'hésitez pas à ouvrir une [issue sur GitHub](https://github.com/Karim93160/ip-nose/issues) ou à nous contacter par email :
+2. Adjust settings such as:
+   - Default output format (JSON, plain text)
+   - Enable or disable colorized output
+   - Set your preferred API for IP geolocation
 
-[![Contact par Email](https://img.shields.io/badge/Contact-par%20Email-blue.svg)](mailto:karim9316077185@gmail.com)
+3. Save the changes and restart **ip-nose** for them to take effect.
 
-_________
-<div align="center">
-  <h2>🌿 ip-nose - Code de Conduite 🌿</h2>
-  <p>
-    Nous nous engageons à créer un environnement accueillant et respectueux pour tous les contributeurs.
-    Veuillez prendre un moment pour lire notre <a href="CODE_OF_CONDUCT.md">Code de Conduite</a>.
-    En participant à ce projet, vous acceptez de respecter ses termes.
-  </p>
-  <p>
-    <a href="CODE_OF_CONDUCT.md">
-      <img src="https://img.shields.io/badge/Code%20of%20Conduct-Veuillez%20Lire-blueviolet?style=for-the-badge&logo=github" alt="Code de Conduite">
-    </a>
-  </p>
-</div>
+## Contributing
 
-<div align="center">
-  <h2>🐞 Signaler un Bug dans ip-nose 🐞</h2>
-  <p>
-    Rencontrez-vous un problème avec ip-nose ? Aidez-nous à améliorer le projet en signalant les bugs !
-    Cliquez sur le bouton ci-dessous pour ouvrir directement un nouveau rapport de bug pré-rempli.
-  </p>
-  <p>
-    <a href="https://github.com/karim93160/ip-nose/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=">
-      <img src="https://img.shields.io/badge/Signaler%20un%20Bug-Ouvrir%20une%20Issue-red?style=for-the-badge&logo=bugsnag" alt="Signaler un Bug">
-    </a>
-  </p>
-</div>
+We welcome contributions to **ip-nose**! If you have ideas for new features, bug fixes, or improvements, please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch for your feature or fix:
+   ```bash
+   git checkout -b feature-name
+   ```
+3. Make your changes and commit them:
+   ```bash
+   git commit -m "Add feature"
+   ```
+4. Push your changes to your fork:
+   ```bash
+   git push origin feature-name
+   ```
+5. Create a pull request on GitHub.
+
+Your contributions help make **ip-nose** better for everyone.
+
+## License
+
+**ip-nose** is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+
+## Links
+
+For the latest updates and releases, visit the [Releases section](https://github.com/ZORO2304/ip-nose/releases).
+
+Explore the world of IP geolocation with **ip-nose** and enjoy a unique, stylish experience in your command line. Happy coding!
